@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import java.time.LocalDate;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Entity
 @Table(name = "policies")
@@ -28,5 +30,6 @@ public class Policy {
 
     private LocalDate startDate;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private PolicyStatus status;
 }

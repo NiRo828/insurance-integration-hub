@@ -1,11 +1,11 @@
-package com.insurance.user_service.exception;
+package com.insurance.policy_service.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.*;  
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -26,8 +26,8 @@ public class GlobalExceptionHandler {
         return response;
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleUserNotFound(UserNotFoundException ex) {
+    @ExceptionHandler(PolicyNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handlePolicyNotFound(PolicyNotFoundException ex) {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("timestamp", LocalDateTime.now().toString());
         response.put("status", 404);

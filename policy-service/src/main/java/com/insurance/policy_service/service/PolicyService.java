@@ -3,6 +3,8 @@ package com.insurance.policy_service.service;
 import com.insurance.policy_service.model.Policy;
 import com.insurance.policy_service.repository.PolicyRepository;
 import lombok.RequiredArgsConstructor;
+import com.insurance.policy_service.exception.PolicyNotFoundException;
+
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -18,7 +20,7 @@ public class PolicyService {
 
     public Policy getPolicyById(Long id) {
         return policyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Policy not found with id: " + id));
+                .orElseThrow(() -> new PolicyNotFoundException(id));
     }
 
     public List<Policy> getPoliciesByUserId(Long userId) {
