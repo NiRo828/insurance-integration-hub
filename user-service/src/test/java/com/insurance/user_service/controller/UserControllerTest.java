@@ -3,7 +3,6 @@ package com.insurance.user_service.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.insurance.user_service.dto.UserRequest;
 import com.insurance.user_service.dto.UserResponse;
-import com.insurance.user_service.exception.GlobalExceptionHandler;
 import com.insurance.user_service.exception.UserNotFoundException;
 import com.insurance.user_service.service.UserServiceInterface;
 import org.junit.jupiter.api.BeforeEach;
