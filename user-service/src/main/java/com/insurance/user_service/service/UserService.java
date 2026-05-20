@@ -3,6 +3,7 @@ package com.insurance.user_service.service;
 import com.insurance.user_service.dto.UserRequest;
 import com.insurance.user_service.dto.UserResponse;
 import com.insurance.user_service.exception.UserNotFoundException;
+import com.insurance.user_service.mapper.UserMapper;
 import com.insurance.user_service.model.User;
 import com.insurance.user_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,55 +12,47 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserServiceInterface {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
+    @Override
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(this::toResponse)
+                .map(userMapper::toResponse)
                 .toList();
     }
 
+    @Override
     public UserResponse getUserById(Long id) {
-        return toResponse(findUserById(id));
+        return userMapper.toResponse(findUserById(id));
     }
 
+    @Override
     public UserResponse createUser(UserRequest request) {
-        User user = User.builder()
-                .name(request.getName())
-                .email(request.getEmail())
-                .policyNumber(request.getPolicyNumber())
-                .build();
-        return toResponse(userRepository.save(user));
+        User user = userMapper.toEntity(request);
+        return userMapper.toResponse(userRepository.save(user));
     }
 
+    @Override
     public UserResponse updateUser(Long id, UserRequest request) {
         User existing = findUserById(id);
         existing.setName(request.getName());
         existing.setEmail(request.getEmail());
         existing.setPolicyNumber(request.getPolicyNumber());
-        return toResponse(userRepository.save(existing));
+        return userMapper.toResponse(userRepository.save(existing));
     }
 
+    @Override
     public void deleteUser(Long id) {
         findUserById(id);
         userRepository.deleteById(id);
     }
 
-    // Private helpers
     private User findUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
-    }
-
-    private UserResponse toResponse(User user) {
-        return UserResponse.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .policyNumber(user.getPolicyNumber())
-                .build();
     }
 }

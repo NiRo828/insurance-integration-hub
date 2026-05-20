@@ -1,7 +1,8 @@
 package com.insurance.policy_service.controller;
 
-import com.insurance.policy_service.model.Policy;
-import com.insurance.policy_service.service.PolicyService;
+import com.insurance.policy_service.dto.PolicyRequest;
+import com.insurance.policy_service.dto.PolicyResponse;
+import com.insurance.policy_service.service.PolicyServiceInterface;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,32 +14,32 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PolicyController {
 
-    private final PolicyService policyService;
+    private final PolicyServiceInterface policyService;
 
     @GetMapping
-    public List<Policy> getAllPolicies() {
+    public List<PolicyResponse> getAllPolicies() {
         return policyService.getAllPolicies();
     }
 
     @GetMapping("/{id}")
-    public Policy getPolicyById(@PathVariable Long id) {
+    public PolicyResponse getPolicyById(@PathVariable Long id) {
         return policyService.getPolicyById(id);
     }
 
     @GetMapping("/user/{userId}")
-    public List<Policy> getPoliciesByUserId(@PathVariable Long userId) {
+    public List<PolicyResponse> getPoliciesByUserId(@PathVariable Long userId) {
         return policyService.getPoliciesByUserId(userId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Policy createPolicy(@Valid @RequestBody Policy policy) {
-        return policyService.createPolicy(policy);
+    public PolicyResponse createPolicy(@Valid @RequestBody PolicyRequest request) {
+        return policyService.createPolicy(request);
     }
 
     @PutMapping("/{id}")
-    public Policy updatePolicy(@PathVariable Long id, @Valid @RequestBody Policy policy) {
-        return policyService.updatePolicy(id, policy);
+    public PolicyResponse updatePolicy(@PathVariable Long id, @Valid @RequestBody PolicyRequest request) {
+        return policyService.updatePolicy(id, request);
     }
 
     @DeleteMapping("/{id}")

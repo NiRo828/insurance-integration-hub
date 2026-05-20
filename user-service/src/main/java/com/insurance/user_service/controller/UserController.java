@@ -2,7 +2,8 @@ package com.insurance.user_service.controller;
 
 import com.insurance.user_service.dto.UserRequest;
 import com.insurance.user_service.dto.UserResponse;
-import com.insurance.user_service.service.UserService;
+import com.insurance.user_service.service.UserServiceInterface;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+    private final UserServiceInterface userService;
 
     @GetMapping
     public List<UserResponse> getAllUsers() {
