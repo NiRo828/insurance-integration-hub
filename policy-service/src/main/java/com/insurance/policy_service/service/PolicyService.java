@@ -1,19 +1,23 @@
 package com.insurance.policy_service.service;
 
-import com.insurance.policy_service.dto.PolicyRequest;
-import com.insurance.policy_service.dto.PolicyResponse;
 import com.insurance.policy_service.exception.PolicyNotFoundException;
-import com.insurance.policy_service.mapper.PolicyMapper;
-import com.insurance.policy_service.model.Policy;
+import com.insurance.policy_service.dto.UserPolicyDetailsResponse;
 import com.insurance.policy_service.repository.PolicyRepository;
-import lombok.RequiredArgsConstructor;
+import com.insurance.policy_service.client.UserServiceClient;
+import com.insurance.policy_service.dto.UserDetailsResponse;
+import com.insurance.policy_service.mapper.PolicyMapper;
+import com.insurance.policy_service.dto.PolicyResponse;
+import com.insurance.policy_service.dto.PolicyRequest;
+import com.insurance.policy_service.model.Policy;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class PolicyService implements PolicyServiceInterface {
 
+    private final UserServiceClient userServiceClient;
     private final PolicyRepository policyRepository;
     private final PolicyMapper policyMapper;
 
@@ -64,4 +68,23 @@ public class PolicyService implements PolicyServiceInterface {
         return policyRepository.findById(id)
                 .orElseThrow(() -> new PolicyNotFoundException(id));
     }
+
+    @Override
+    public UserPolicyDetailsResponse getUserPolicyDetails(Long userId) {
+        return userServiceClient.getUserById(userId)
+            .map(user -> {
+                List<PolicyResponse> policies = getPoliciesByUserId(userId);
+                double totalPremium = policies.stream()
+                        .mapToDouble(PolicyResponse::getPremium)
+                        .sum();
+                return UserPolicyDetailsResponse.builder()
+                        .user(user)
+                        .policies(policies)
+                        .totalPolicies(policies.size())
+                        .totalPremium(totalPremium)
+                        .build();
+            })
+            .orElseThrow(() -> new RuntimeException(
+                "User not found or user-service unavailable for userId: " + userId));
+}
 }

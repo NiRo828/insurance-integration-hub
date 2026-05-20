@@ -1,12 +1,14 @@
 package com.insurance.policy_service.controller;
 
-import com.insurance.policy_service.dto.PolicyRequest;
-import com.insurance.policy_service.dto.PolicyResponse;
+import com.insurance.policy_service.exception.PolicyNotFoundException;
 import com.insurance.policy_service.service.PolicyServiceInterface;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import com.insurance.policy_service.dto.UserPolicyDetailsResponse;
+import com.insurance.policy_service.dto.PolicyResponse;
+import com.insurance.policy_service.dto.PolicyRequest;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -47,4 +49,10 @@ public class PolicyController {
     public void deletePolicy(@PathVariable Long id) {
         policyService.deletePolicy(id);
     }
+
+    @GetMapping("/user/{userId}/details")
+    public UserPolicyDetailsResponse getUserPolicyDetails(@PathVariable Long userId) {
+        return policyService.getUserPolicyDetails(userId);
+    }
+
 }
