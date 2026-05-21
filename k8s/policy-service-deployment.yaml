@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: policy-service
+  labels:
+    app: policy-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: policy-service
+  template:
+    metadata:
+      labels:
+        app: policy-service
+    spec:
+      containers:
+        - name: policy-service
+          image: localhost:5000/policy-service:1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          env:
+            - name: services.user-service.url
+              value: "http://user-service:8081"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 40
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 60
+            periodSeconds: 15
