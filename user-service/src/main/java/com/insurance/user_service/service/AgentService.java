@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,22 +23,21 @@ public class AgentService {
 
     private final UserServiceInterface userService;
     private final ObjectMapper objectMapper;
+    private final OkHttpClient httpClient;
 
     @Value("${anthropic.api.key}")
     private String anthropicApiKey;
+
+    @Value("${services.policy-service.url}")
+    private String policyServiceUrl;
 
     private static final String CLAUDE_API_URL = "https://api.anthropic.com/v1/messages";
     private static final String MODEL = "claude-haiku-4-5-20251001";
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
     public AgentResponse query(AgentRequest request) {
-        // Step 1 - Build context from real data
         String context = buildContext(request.getUserId());
-
-        // Step 2 - Build prompt
         String prompt = buildPrompt(context, request.getQuestion());
-
-        // Step 3 - Call Claude API
         String answer = callClaude(prompt);
 
         return AgentResponse.builder()
@@ -48,14 +49,33 @@ public class AgentService {
 
     private String buildContext(Long userId) {
         if (userId == null) {
-            List<UserResponse> users = userService.getAllUsers();
-            return "All users in the system: " + users.toString();
+            return userService.getAllUsers().stream()
+                    .map(user -> "User: %s\nPolicies: %s".formatted(
+                            user, fetchPoliciesForUser(user.getId())))
+                    .collect(Collectors.joining("\n---\n", "All users:\n", ""));
         }
         try {
             UserResponse user = userService.getUserById(userId);
-            return "User details: " + user.toString();
+            return "User: %s\nPolicies: %s".formatted(user, fetchPoliciesForUser(userId));
         } catch (UserNotFoundException e) {
             return "No user found with id: " + userId;
+        }
+    }
+
+    private String fetchPoliciesForUser(Long userId) {
+        try {
+            Request request = new Request.Builder()
+                    .url(policyServiceUrl + "/policies/user/" + userId + "/details")
+                    .get()
+                    .build();
+            try (Response response = httpClient.newCall(request).execute()) {
+                return response.isSuccessful() && response.body() != null
+                        ? response.body().string()
+                        : "No policies found";
+            }
+        } catch (Exception e) {
+            log.warn("Could not fetch policies for userId {}: {}", userId, e.getMessage());
+            return "Policy service unavailable";
         }
     }
 
@@ -77,20 +97,14 @@ public class AgentService {
 
     private String callClaude(String prompt) {
         try {
-            OkHttpClient client = new OkHttpClient();
-
-            String requestBody = objectMapper.writeValueAsString(
-                    new java.util.HashMap<>() {{
-                        put("model", MODEL);
-                        put("max_tokens", 1024);
-                        put("messages", List.of(
-                                new java.util.HashMap<>() {{
-                                    put("role", "user");
-                                    put("content", prompt);
-                                }}
-                        ));
-                    }}
-            );
+            String requestBody = objectMapper.writeValueAsString(Map.of(
+                    "model", MODEL,
+                    "max_tokens", 1024,
+                    "messages", List.of(Map.of(
+                            "role", "user",
+                            "content", prompt
+                    ))
+            ));
 
             Request httpRequest = new Request.Builder()
                     .url(CLAUDE_API_URL)
@@ -100,13 +114,12 @@ public class AgentService {
                     .addHeader("content-type", "application/json")
                     .build();
 
-            try (Response response = client.newCall(httpRequest).execute()) {
-                if (!response.isSuccessful()) {
+            try (Response response = httpClient.newCall(httpRequest).execute()) {
+                if (!response.isSuccessful() || response.body() == null) {
                     log.error("Claude API error: {}", response.code());
                     return "AI service temporarily unavailable";
                 }
-                String responseBody = response.body().string();
-                JsonNode root = objectMapper.readTree(responseBody);
+                JsonNode root = objectMapper.readTree(response.body().string());
                 return root.path("content").get(0).path("text").asText();
             }
         } catch (Exception e) {
