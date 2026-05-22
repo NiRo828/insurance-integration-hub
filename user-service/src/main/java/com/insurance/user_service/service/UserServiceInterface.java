@@ -10,4 +10,5 @@ public interface UserServiceInterface {
     UserResponse createUser(UserRequest request);
     UserResponse updateUser(Long id, UserRequest request);
     void deleteUser(Long id);
+    List<UserResponse> getUsersByPolicyNumber(String policyNumber);
 }

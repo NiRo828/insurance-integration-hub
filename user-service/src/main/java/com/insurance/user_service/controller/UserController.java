@@ -27,6 +27,11 @@ public class UserController {
         return userService.getUserById(id);
     }
 
+    @GetMapping("/by-policy/{policyNumber}")
+    public List<UserResponse> getUsersByPolicyNumber(@PathVariable String policyNumber) {
+        return userService.getUsersByPolicyNumber(policyNumber);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse createUser(@Valid @RequestBody UserRequest request) {

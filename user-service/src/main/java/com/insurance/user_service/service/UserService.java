@@ -51,6 +51,14 @@ public class UserService implements UserServiceInterface {
         userRepository.deleteById(id);
     }
 
+    @Override
+    public List<UserResponse> getUsersByPolicyNumber(String policyNumber) {
+        return userRepository.findByPolicyNumber(policyNumber)
+                .stream()
+                .map(userMapper::toResponse)
+                .toList();
+    }
+
     private User findUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));

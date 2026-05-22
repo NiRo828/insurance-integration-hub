@@ -138,6 +138,34 @@ class UserControllerTest {
     }
 
     @Nested
+    @DisplayName("GET /users/by-policy/{policyNumber}")
+    class GetUsersByPolicyNumber {
+
+        @Test
+        @DisplayName("should return 200 with users matching the policy number")
+        void shouldReturn200WithMatchingUsers() throws Exception {
+            when(userService.getUsersByPolicyNumber("POL-001")).thenReturn(List.of(sampleResponse));
+
+            mockMvc.perform(get("/users/by-policy/POL-001"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[0].id").value(1L))
+                    .andExpect(jsonPath("$[0].policyNumber").value("POL-001"));
+
+            verify(userService, times(1)).getUsersByPolicyNumber("POL-001");
+        }
+
+        @Test
+        @DisplayName("should return empty list when no users match")
+        void shouldReturnEmptyListWhenNoMatch() throws Exception {
+            when(userService.getUsersByPolicyNumber("POL-999")).thenReturn(List.of());
+
+            mockMvc.perform(get("/users/by-policy/POL-999"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$").isEmpty());
+        }
+    }
+
+    @Nested
     @DisplayName("DELETE /users/{id}")
     class DeleteUser {
 
