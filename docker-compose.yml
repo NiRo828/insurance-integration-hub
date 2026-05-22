@@ -28,9 +28,6 @@ services:
       - insurance-network
     restart: unless-stopped
     mem_limit: 512m
-    depends_on:
-      user-service:
-        condition: service_healthy
     environment:
       - services.user-service.url=http://user-service:8081
     healthcheck:

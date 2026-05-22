@@ -65,7 +65,7 @@ public class AgentService {
     private String fetchPoliciesForUser(Long userId) {
         try {
             Request request = new Request.Builder()
-                    .url(policyServiceUrl + "/policies/user/" + userId + "/details")
+                    .url(policyServiceUrl + "/policies/user/" + userId)
                     .get()
                     .build();
             try (Response response = httpClient.newCall(request).execute()) {
