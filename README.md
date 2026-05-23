@@ -389,6 +389,11 @@ Co-Authored-By: Claude
 > production database, authentication, PII masking, circuit breakers,
 > observability, and CI/CD — so I can speak to what production would require.
 
+## Related Documentation
+
+- [Architecture Guide](./ARCHITECTURE.md)
+- [Commands Reference](./docs/commands-reference.md)
+
 ---
 
 ## License
