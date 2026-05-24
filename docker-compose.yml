@@ -10,6 +10,9 @@ services:
       - insurance-network
     restart: unless-stopped
     mem_limit: 512m
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - SERVICES_POLICY_SERVICE_URL=http://policy-service:8082
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/actuator/health"]
       interval: 30s
